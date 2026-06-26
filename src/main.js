@@ -9,7 +9,7 @@ const app = createApp(App)
 
 Sentry.init({
   app,
-  dsn: "https://f7629da1ffb91cbc7fd374be8139cc74@o4511604637761536.ingest.us.sentry.io/4511604642938880",
+  dsn: "https://e21ebed524081bffd83b6b68c56af9c9@o4511604637761536.ingest.us.sentry.io/4511604698316800",
   dataCollection: {
     // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:
     // https://docs.sentry.io/platforms/javascript/guides/vue/configuration/options/#dataCollection
@@ -17,7 +17,9 @@ Sentry.init({
     // httpBodies: []
   },
   integrations: [
-    Sentry.replayIntegration()
+    Sentry.replayIntegration(),
+    Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] }),
+
   ],
   // Session Replay
 
