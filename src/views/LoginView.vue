@@ -49,9 +49,10 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue'
+    import { ref, watch } from 'vue'
     import { useRouter } from 'vue-router'
     import { useAuth } from '../composables/useAuth'
+    import * as Sentry from '@sentry/vue'
 
     const router = useRouter()
     const { login } = useAuth()
@@ -65,27 +66,54 @@
     const isLoading = ref(false)
     const xssInput = ref('')
 
-    // Control 1: Validación de entradas
     const validateEmail = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!email.value) {
             emailError.value = 'El correo es obligatorio'
         } else if (!emailRegex.test(email.value)) {
             emailError.value = 'Formato de correo inválido'
+
+            // LOG DE ERROR: validación fallida
+            Sentry.logger.warn('Validación de entrada fallida: formato de correo', {
+                tags: { log_type: 'error', event: 'validation_failed', campo: 'email' },
+                extra: { valorIngresado: email.value, timestamp: new Date().toISOString() }
+            })
         } else {
             emailError.value = ''
         }
     }
 
     const validatePassword = () => {
-        if (!password.value) {
-            passwordError.value = 'La contraseña es obligatoria'
-        } else if (password.value.length < 8) {
-            passwordError.value = 'Mínimo 8 caracteres'
-        } else {
-            passwordError.value = ''
+    if (!password.value) {
+        passwordError.value = 'La contraseña es obligatoria'
+    } else if (password.value.length < 8) {
+        passwordError.value = 'Mínimo 8 caracteres'
+
+        // LOG DE ERROR: validación fallida
+        Sentry.logger.warn('Validación de entrada fallida: longitud de contraseña', {
+        tags: { log_type: 'error', event: 'validation_failed', campo: 'password' },
+        extra: { longitudIngresada: password.value.length, timestamp: new Date().toISOString() }
+        })
+    } else {
+        passwordError.value = ''
+    }
+    }
+
+    // Detecta intento de XSS en el campo de demostración
+    const detectarXSS = (valor) => {
+        const patronesSospechosos = /<script|javascript:|onerror=|onload=/i
+        if (patronesSospechosos.test(valor)) {
+            // LOG DE ERROR: intento de XSS detectado
+            Sentry.logger.error('Intento de inyección XSS detectado', {
+                tags: { log_type: 'error', event: 'xss_attempt' },
+                extra: { payload: valor, timestamp: new Date().toISOString() }
+            })
         }
     }
+
+    watch(xssInput, (nuevoValor) => {
+        detectarXSS(nuevoValor)
+    })
 
     const handleSubmit = () => {
         validateEmail()
@@ -96,16 +124,15 @@
         isLoading.value = true
         errorMessage.value = ''
 
-        // Simulamos delay de red
         setTimeout(() => {
             const result = login(email.value, password.value)
             if (result.success) {
-            successMessage.value = '¡Acceso concedido! Redirigiendo...'
-            setTimeout(() => router.push('/dashboard'), 1000)
+                successMessage.value = '¡Acceso concedido! Redirigiendo...'
+                setTimeout(() => router.push('/dashboard'), 1000)
             } else {
-            errorMessage.value = result.message
+                errorMessage.value = result.message
             }
-            isLoading.value = false
+                isLoading.value = false
         }, 800)
     }
 </script>
