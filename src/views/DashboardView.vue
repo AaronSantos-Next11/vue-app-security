@@ -13,10 +13,10 @@
       <div class="controls-info">
         <h3>Controles de seguridad activos</h3>
         <ul>
-          <li>✅ Control 1: Validación de entradas aplicada en login</li>
-          <li>✅ Control 2: Protección XSS automática de Vue.js</li>
-          <li>✅ Control 3: Guard de ruta activo — esta página requiere autenticación</li>
-          <li>✅ Control 4: Sesión gestionada con token en sessionStorage</li>
+          <li>Control 1: Validación de entradas aplicada en login</li>
+          <li>Control 2: Protección XSS automática de Vue.js</li>
+          <li>Control 3: Guard de ruta activo — esta página requiere autenticación</li>
+          <li>Control 4: Sesión gestionada con token en sessionStorage</li>
         </ul>
       </div>
 
