@@ -1,0 +1,39 @@
+name: Security CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  security:
+    name: SAST — Lint, Audit & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Instalar dependencias
+        run: pnpm install
+
+      - name: ESLint — Análisis estático de seguridad
+        run: pnpm lint
+
+      - name: pnpm audit — Análisis de vulnerabilidades en dependencias
+        run: pnpm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Vitest — Pruebas de regresión de seguridad
+        run: pnpm test
