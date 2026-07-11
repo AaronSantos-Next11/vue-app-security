@@ -27,7 +27,7 @@ const router = createRouter({
 })
 
 // Guard global — se ejecuta antes de cada navegación
-router.beforeEach((to, from) => {
+router.beforeEach((to) => {
   const { checkSession } = useAuth()
   const isAuth = checkSession()
 
